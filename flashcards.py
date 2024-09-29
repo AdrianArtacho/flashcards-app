@@ -77,6 +77,7 @@ def main(url="", options=options, verbose=False):
         st.warning("Please enter a valid database URL to continue.")
         return  # Stop execution until a valid URL is entered
 
+    # exit()
     # Mode selection using Streamlit's selectbox
     selected_option = st.selectbox("Choose a mode", options)
 
@@ -89,6 +90,9 @@ def main(url="", options=options, verbose=False):
 
         # Filter flashcards based on group selection using the updated handle_groups
         filtered_cards = handle_groups.main(flashcards, verbose=verbose)
+        exit()
+        print(filtered_cards)
+        # exit()
 
         # If the user selects "flash_forgotten", filter forgotten cards
         if selected_option == options[1]:

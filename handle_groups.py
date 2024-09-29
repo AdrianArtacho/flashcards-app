@@ -5,7 +5,7 @@ import local_choices
 def main(data, verbose=False):
     # Get the number of items in the list
     num_items = len(data)
-    st.write(f"There is a total of {num_items} people in the list.")
+    st.write(f"There is a total of {num_items} people in the database.")
 
     # Create an empty set to store unique 'group' values
     unique_groups = set()
