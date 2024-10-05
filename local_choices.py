@@ -1,6 +1,6 @@
 local_choices_filename = 'local_choices.txt'
 
-def save_list_to_txt(lst, filename=local_choices_filename):
+def save_list_to_txt(lst, filename=local_choices_filename, verbose=True):
     with open(filename, 'w') as f:
         for item in lst:
             f.write(f"{item}\n")
@@ -11,8 +11,10 @@ def save_list_to_txt(lst, filename=local_choices_filename):
 
 # Save the list to a .txt file
 # save_list_to_txt(my_list, filename)
-
-    print(f"List saved to '{filename}' successfully.")
+    if verbose:
+        print(f"List saved to '{filename}' successfully:", lst)
+    else:
+        print(f"List saved to '{filename}' successfully.")
 
 
 def load_list_from_txt(filename=local_choices_filename, verbose=False):
