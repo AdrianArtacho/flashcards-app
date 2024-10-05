@@ -70,20 +70,19 @@ def main(url="", options=options, verbose=True):
 
     # Use the db_url.main() function to get the URL
     if url == "":
-        spreadsheet_url = db_url.main(verbose=verbose)
+        # Allow the user to input the URL manually if it's not passed as an argument
+        spreadsheet_url = st.text_input("Enter the database URL", "")
     else:
         spreadsheet_url = url
 
-    if verbose:
-        print(">> spreadsheet_url:", spreadsheet_url)
-
-    # exit()
-    # Ensure a URL is entered before proceeding
+    # Check if a valid URL is entered
     if not spreadsheet_url:
         st.warning("Please enter a valid database URL to continue.")
         return  # Stop execution until a valid URL is entered
 
-    # exit()
+    if verbose:
+        print(">> spreadsheet_url:", spreadsheet_url)
+
     # Mode selection using Streamlit's selectbox
     selected_option = st.selectbox("Choose a mode", options)
 
@@ -96,9 +95,6 @@ def main(url="", options=options, verbose=True):
 
         # Filter flashcards based on group selection using the updated handle_groups
         filtered_cards = handle_groups.main(flashcards, verbose=verbose)
-        exit()
-        print(filtered_cards)
-        # exit()
 
         # If the user selects "flash_forgotten", filter forgotten cards
         if selected_option == options[1]:
@@ -119,6 +115,7 @@ def main(url="", options=options, verbose=True):
             show_flashcard(filtered_cards, selected_option, current_index)
         else:
             st.write("Congratulations! You've gone through all the flashcards.")
+
 
 
 if __name__ == "__main__":
