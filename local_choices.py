@@ -1,40 +1,55 @@
-local_choices_filename = 'local_choices.txt'
+import os
+import tempfile
+import streamlit as st
 
-def save_list_to_txt(lst, filename=local_choices_filename, verbose=True):
-    with open(filename, 'w') as f:
+# Create a temporary file when the session starts and store the filename in Streamlit's session state
+def create_temp_txt():
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.txt', mode='w+', encoding='utf-8')
+    temp_file.close()  # Close the file so we can access it later
+    return temp_file.name
+
+# Initialize the session state with the temporary file if not already set
+if 'local_choices_filename' not in st.session_state:
+    st.session_state['local_choices_filename'] = create_temp_txt()
+
+# Save a list to the temporary text file
+def save_list_to_txt(lst, filename=st.session_state['local_choices_filename'], verbose=True):
+    """
+    Saves a list to a temporary text file stored in the session state.
+    """
+    with open(filename, 'w', encoding='utf-8') as f:
         for item in lst:
             f.write(f"{item}\n")
 
-# Example list
-# my_list = ['apple', 'banana', 'cherry', 'date']
-# filename = 'my_list.txt'
-
-# Save the list to a .txt file
-# save_list_to_txt(my_list, filename)
     if verbose:
         print(f"List saved to '{filename}' successfully:", lst)
     else:
         print(f"List saved to '{filename}' successfully.")
 
 
-def load_list_from_txt(filename=local_choices_filename, verbose=False):
+# Load a list from the temporary text file
+def load_list_from_txt(filename=st.session_state['local_choices_filename'], verbose=False):
+    """
+    Loads a list from the temporary text file stored in the session state.
+    """
     lst = []
-    with open(filename, 'r') as f:
-        for line in f:
-            # Remove newline characters and add to the list
-            lst.append(line.strip())
-    
+    try:
+        with open(filename, 'r', encoding='utf-8') as f:
+            for line in f:
+                lst.append(line.strip())  # Remove newline characters and add to the list
+    except FileNotFoundError:
+        if verbose:
+            print(f"File '{filename}' not found, returning an empty list.")
+        return []
+
     if verbose:
-        print("List loaded from file:")
-        print(filename)
+        print(f"List loaded from '{filename}' successfully.")
     
     return lst
 
-# File from which to load the list
-# filename = 'my_list.txt'
 
-# # Load the list from the .txt file
-# loaded_list = load_list_from_txt(filename)
-
-# print("List loaded from file:")
-# print(filename)
+# Optional cleanup: Delete the temp file when needed (can be triggered at the end of the session)
+def cleanup_temp_txt():
+    if 'local_choices_filename' in st.session_state:
+        os.remove(st.session_state['local_choices_filename'])
+        del st.session_state['local_choices_filename']

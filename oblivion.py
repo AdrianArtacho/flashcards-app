@@ -1,10 +1,24 @@
 import csv
 import os
+import tempfile
+import streamlit as st
 
-oblivion_filename = 'oblivion.csv'
+# Create a temporary file when the session starts and store the filename in Streamlit's session state
+def create_temp_csv():
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.csv', mode='w+', newline='', encoding='utf-8')
+    # Write the header (this assumes 'name' is the only column in your CSV)
+    fieldnames = ['name']
+    writer = csv.DictWriter(temp_file, fieldnames=fieldnames)
+    writer.writeheader()  # Write header only once
+    temp_file.close()  # Close the file so we can access it later
+    return temp_file.name
 
+# Initialize the session state with the temporary file if not already set
+if 'oblivion_filename' not in st.session_state:
+    st.session_state['oblivion_filename'] = create_temp_csv()
 
-def add_name_to_csv(name, filename=oblivion_filename, verbose=False):
+# Add a name to the temporary CSV file
+def add_name_to_csv(name, filename=st.session_state['oblivion_filename'], verbose=False):
     """
     Adds a name to the oblivion CSV if it does not already exist.
     """
@@ -20,10 +34,6 @@ def add_name_to_csv(name, filename=oblivion_filename, verbose=False):
     with open(filename, 'a', newline='', encoding='utf-8') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
-        # Write the header if the file is empty
-        if csvfile.tell() == 0:
-            writer.writeheader()
-
         # Write the name to the CSV
         writer.writerow({'name': name})
 
@@ -31,7 +41,8 @@ def add_name_to_csv(name, filename=oblivion_filename, verbose=False):
         print(f"Name '{name}' added successfully to '{filename}'.")
 
 
-def read_csv_names(filename=oblivion_filename, verbose=False):
+# Read all names from the temporary CSV file
+def read_csv_names(filename=st.session_state['oblivion_filename'], verbose=False):
     """
     Reads names from the oblivion CSV and returns them as a set.
     """
@@ -54,7 +65,8 @@ def read_csv_names(filename=oblivion_filename, verbose=False):
     return names
 
 
-def remove_name_from_csv(name, filename=oblivion_filename, verbose=False):
+# Remove a name from the temporary CSV file
+def remove_name_from_csv(name, filename=st.session_state['oblivion_filename'], verbose=False):
     """
     Removes a name from the oblivion CSV.
     """
@@ -90,7 +102,8 @@ def remove_name_from_csv(name, filename=oblivion_filename, verbose=False):
         print(f"Name '{name}' removed successfully from '{filename}'.")
 
 
-def filter_forgotten_cards(filtered_cards, filename=oblivion_filename, verbose=False):
+# Filter forgotten cards based on the names in the oblivion CSV
+def filter_forgotten_cards(filtered_cards, filename=st.session_state['oblivion_filename'], verbose=False):
     """
     Filters the list of flashcards to only include those in the oblivion CSV.
     If no names from the CSV match, return the original list.
@@ -112,3 +125,9 @@ def filter_forgotten_cards(filtered_cards, filename=oblivion_filename, verbose=F
     if verbose:
         print(f"Filtered cards count: {len(filtered_cards)}")
     return filtered_cards
+
+# Optional cleanup: Delete the temp file when needed (can be triggered at the end of the session)
+def cleanup_temp_csv():
+    if 'oblivion_filename' in st.session_state:
+        os.remove(st.session_state['oblivion_filename'])
+        del st.session_state['oblivion_filename']

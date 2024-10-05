@@ -1,14 +1,12 @@
 import csv
 import random
 import urllib.request
-# from PIL import Image
-# from io import BytesIO
 import streamlit as st
 
 # Import the other modular components (including the updated handle_groups)
 import handle_groups
 import oblivion
-import db_url
+import local_choices
 
 options = [
     "image+name",
@@ -65,7 +63,19 @@ def show_flashcard(flashcards, selected_option, current_index):
             st.session_state['current_index'] += 1  # Move to the next flashcard
 
 
-def main(url="", options=options, verbose=True):
+# def clear_session():
+#     """Clear all session state data and reset the app."""
+#     st.session_state.clear()
+#     st.experimental_rerun()
+
+def clear_session():
+    """Clear all session state data and reset the app."""
+    st.session_state.clear()
+    # Update query params to force a rerun
+    st.experimental_set_query_params()
+
+
+def main(url="", options=options, verbose=False):
     st.title("Flashcard Game")
 
     # Step 1: Use the db_url.main() function to get the URL
@@ -85,7 +95,9 @@ def main(url="", options=options, verbose=True):
 
     # Ensure we have the URL before proceeding to Step 2
     if 'spreadsheet_url' in st.session_state:
-        st.write(f"Database URL: {st.session_state['spreadsheet_url']}")
+
+        if verbose:
+            st.write(f"Database URL: {st.session_state['spreadsheet_url']}")
 
         # Step 2: Mode selection using Streamlit's selectbox
         if 'selected_option' not in st.session_state:
@@ -96,7 +108,9 @@ def main(url="", options=options, verbose=True):
 
         # Ensure we have the mode selected before proceeding
         if 'selected_option' in st.session_state:
-            st.write(f"You selected: {st.session_state['selected_option']}")
+
+            if verbose:
+                st.write(f"You selected: {st.session_state['selected_option']}")
 
             # Step 3: Load and process the flashcards after mode selection
             if 'flashcards_loaded' not in st.session_state:
@@ -131,7 +145,13 @@ def main(url="", options=options, verbose=True):
                 else:
                     st.write("Congratulations! You've gone through all the flashcards.")
 
+    # Display a button to allow the user to close the session and clear all session state
+    if st.button("Close Session"):
+        clear_session()
 
+    # Clear oblivion and local_choices
+    oblivion.cleanup_temp_csv()
+    local_choices.cleanup_temp_txt()
 
 
 if __name__ == "__main__":
